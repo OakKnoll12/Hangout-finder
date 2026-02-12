@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Hangout Planner</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <div class="wrap">
+    <header class="header">
+      <h1>Hangout Planner</h1>
+      <p class="muted">Tap days that <b>don’t work</b>. Blank = available.</p>
+    </header>
+
+    <main>
+      <section id="home" class="card">
+        <h2>Create Event</h2>
+
+        <label class="field">
+          <span>Title</span>
+          <input id="title" placeholder="Game night / Dinner / etc">
+        </label>
+
+        <div class="grid2">
+          <label class="field">
+            <span>Start</span>
+            <input id="start" type="date">
+          </label>
+          <label class="field">
+            <span>End</span>
+            <input id="end" type="date">
+          </label>
+        </div>
+
+        <button class="btn" onclick="createEvent()">Create</button>
+
+        <div id="created" class="mono created"></div>
+
+        <hr>
+
+        <h2>Join Event</h2>
+
+        <label class="field">
+          <span>Event ID</span>
+          <input id="eventId" placeholder="Paste event ID">
+        </label>
+
+        <button class="btn" onclick="loadEvent()">Join</button>
+
+        <div id="joinErr" class="error"></div>
+      </section>
+
+      <section id="event" class="card hidden">
+        <div class="row">
+          <div>
+            <h2 id="eventTitle"></h2>
+            <div class="mono muted small" id="eventMeta"></div>
+          </div>
+          <button class="btn ghost" onclick="goHome()">Back</button>
+        </div>
+
+        <hr>
+
+        <label class="field">
+          <span>Your name</span>
+          <input id="username" placeholder="Alex">
+        </label>
+
+        <div class="grid2">
+          <label class="field">
+            <span>Quick mark</span>
+            <select id="weekday">
+              <option value="1">Every Monday</option>
+              <option value="2">Every Tuesday</option>
+              <option value="3">Every Wednesday</option>
+              <option value="4">Every Thursday</option>
+              <option value="5">Every Friday</option>
+              <option value="6">Every Saturday</option>
+              <option value="0">Every Sunday</option>
+            </select>
+          </label>
+
+          <button class="btn" onclick="markWeekday()">Mark “doesn’t work”</button>
+        </div>
+
+        <button class="btn" onclick="save()">Save Availability</button>
+        <div id="saveMsg" class="muted small"></div>
+
+        <hr>
+
+        <h3 class="h3">Calendar</h3>
+        <div class="calendarWrap">
+          <div id="calendar" class="calendar"></div>
+        </div>
+
+        <div class="legend muted small">
+          <span class="dot off"></span> Doesn’t work
+          <span class="dot ok"></span> Available (blank)
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
