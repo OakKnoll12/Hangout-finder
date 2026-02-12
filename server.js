@@ -10,10 +10,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 
-// Serve flat static files
-app.get("/", (_, res) => res.sendFile(path.join(__dirname, "index.html")));
-app.use("/app.js", express.static(path.join(__dirname, "app.js")));
-app.use("/styles.css", express.static(path.join(__dirname, "styles.css")));
+// ✅ Serve ALL flat files (index.html, app.js, styles.css) from the same folder
+app.use(express.static(__dirname));
 
 // ---------------- DB ----------------
 const db = new Database("hangout.db");
@@ -62,26 +60,27 @@ function makeId() {
 // ---------------- API ----------------
 
 app.post("/api/events", (req, res) => {
-  const { title, startDate, endDate } = req.body;
-  if (!title || !startDate || !endDate)
-    return res.status(400).json({ error: "Missing fields" });
+  const { title, startDate, endDate } = req.body || {};
+  if (!title || !startDate || !endDate) {
+    return res.status(400).json({ error: "Missing fields: title, startDate, endDate" });
+  }
 
   const id = makeId();
 
   db.prepare(`
-    INSERT INTO events (id,title,start_date,end_date,created_at)
-    VALUES (?,?,?,?,?)
+    INSERT INTO events (id, title, start_date, end_date, created_at)
+    VALUES (?, ?, ?, ?, ?)
   `).run(id, title, startDate, endDate, now());
 
   res.json({ id });
 });
 
 app.get("/api/events/:id", (req, res) => {
-  const event = db.prepare("SELECT * FROM events WHERE id=?").get(req.params.id);
+  const event = db.prepare("SELECT * FROM events WHERE id = ?").get(req.params.id);
   if (!event) return res.status(404).json({ error: "Not found" });
 
   const responses = db.prepare(
-    "SELECT name, unavailable_json FROM responses WHERE event_id=?"
+    "SELECT name, unavailable_json FROM responses WHERE event_id = ?"
   ).all(req.params.id);
 
   res.json({
@@ -94,15 +93,15 @@ app.get("/api/events/:id", (req, res) => {
 });
 
 app.post("/api/events/:id/submit", (req, res) => {
-  const { name, unavailableDates } = req.body;
+  const { name, unavailableDates } = req.body || {};
   if (!name) return res.status(400).json({ error: "Name required" });
 
   db.prepare(`
-    INSERT INTO responses (event_id,name,unavailable_json,updated_at)
-    VALUES (?,?,?,?)
-    ON CONFLICT(event_id,name) DO UPDATE SET
-      unavailable_json=excluded.unavailable_json,
-      updated_at=excluded.updated_at
+    INSERT INTO responses (event_id, name, unavailable_json, updated_at)
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(event_id, name) DO UPDATE SET
+      unavailable_json = excluded.unavailable_json,
+      updated_at = excluded.updated_at
   `).run(
     req.params.id,
     name,
@@ -115,6 +114,6 @@ app.post("/api/events/:id/submit", (req, res) => {
 
 // ---------------- Start ----------------
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log(`Running on http://localhost:${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`Running on http://localhost:${PORT}`);
+});
